@@ -13,14 +13,13 @@ import java.util.Properties;
 
 import com.sjjybsgj.dao.sourcedb.model.SourceDb;
 
-
-
 public class DBUtils {
 	private Connection conn = null;
 	private PreparedStatement pstmt = null;
 	private ResultSet rs = null;
 	private DBType dbtype;
 
+	//设置数据库类型
 	public void setDbtype(String dbtype) {
 		dbtype = dbtype.toUpperCase();
 		if (dbtype.toUpperCase().equals("POSTGRESQL")) {
@@ -35,6 +34,7 @@ public class DBUtils {
 			throw new RuntimeException("不支持的数据库类型");
 		}
 	}
+
 
 	public DBUtils(SourceDb sourcedb) {
 		try {
@@ -61,6 +61,13 @@ public class DBUtils {
 		}
 	}
 
+	//获取连接
+	public Connection getConn(){
+
+		return conn;
+	}
+
+	//关闭连接
 	public void closeConn() {
 		if (rs != null) {
 			try {
@@ -84,6 +91,7 @@ public class DBUtils {
 			}
 		}
 	}
+
 
 	public String getRangeSql(String string, String dbName,String tableName, String cloumnName,String dbType) {
 		StringBuffer conditions = new StringBuffer();
@@ -127,6 +135,35 @@ public class DBUtils {
 		}
 
 	}
+
+	//通过自定义sql语句执行查询
+	public List<List<String>> execQuerySql(String sql){
+		try {
+			List<List<String>> list = new ArrayList<List<String>>();
+			Statement stmt = conn.createStatement();
+			rs = stmt.executeQuery(sql);
+			ResultSetMetaData rsmd = rs.getMetaData();
+			int columnCount = rsmd.getColumnCount();
+			List<String> l = new ArrayList<String>();
+			for(int i = 0; i < columnCount; i++) {
+				l.add(rsmd.getColumnName(i+1));
+			}
+			list.add(l);
+			while(rs.next()) {
+				l = new ArrayList<String>();
+				for(int i = 0; i < columnCount; i++) {
+					l.add(rs.getString(i + 1));
+
+				}
+				list.add(l);
+			}
+			return list;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
 	public void getTableRel() {
 
 	}

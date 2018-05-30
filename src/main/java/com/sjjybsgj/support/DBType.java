@@ -4,7 +4,7 @@ public enum DBType {
 	/**
 	 * mysql
 	 */
-	MYSQL("jdbc:mysql:", "com.mysql.jdbc.Driver"),
+	MYSQL("jdbc:mysql://", "com.mysql.jdbc.Driver"),
 	/**
 	 * postgresql
 	 */
@@ -12,11 +12,11 @@ public enum DBType {
 	/**
 	 * sql server
 	 */
-	SQLSERVER("jdbc:sqlserver:", "com.microsoft.sqlserver.jdbc.SQLServerDriver"),
+	SQLSERVER("jdbc:sqlserver://", "com.microsoft.sqlserver.jdbc.SQLServerDriver"),
 	/**
 	 * oracle
 	 */
-	ORACLE("jdbc:oracle:", "oracle.jdbc.driver.OracleDriver");
+	ORACLE("jdbc:oracle:thin:@", "oracle.jdbc.driver.OracleDriver");
 
 	private String jdbcUrl;
 	private String driverClass;

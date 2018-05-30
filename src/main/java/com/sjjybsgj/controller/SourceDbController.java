@@ -1,17 +1,19 @@
 package com.sjjybsgj.controller;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.sjjybsgj.dao.model.MsgModel;
+import com.sjjybsgj.support.DBUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sjjybsgj.core.annotation.MapperInject;
-import com.sjjybsgj.controller.BaseController;
-
 
 import com.sjjybsgj.core.persistence.DelegateMapper;
 import com.sjjybsgj.dao.model.PageModel;
@@ -38,7 +40,7 @@ public class SourceDbController extends BaseController {
 
 	private static final String NAMESPACE = "com.sjjybsgj.dao.jiaoyan.mapper.jiaoyanMapper";
 
-	@MapperInject
+	@MapperInject(DelegateMapper.class)
 	private DelegateMapper delegateMapper;
 
 	@MapperInject(SourceDbMapper.class)
@@ -51,13 +53,17 @@ public class SourceDbController extends BaseController {
 
 	/**
 	 * 
-	 * 获取所有校验日志
+	 * 获取当前用户配置好的数据源信息
 	 */
-	@RequestMapping(value = "/listsource", method = RequestMethod.POST)
+	@RequestMapping(value = "/listSourceDb", method = RequestMethod.POST)
 	@ResponseBody
-	public PageModel<SourceDb> logList(int offset, int limit, String search, String sort, String order) {
+	public PageModel<SourceDb> listSource(int offset, int limit, String search, String sort, String order) {
 		this.offsetPage(offset, limit);
-		List<SourceDb> list = mapper.selectByExample(null);
+
+		Map<String,String> parameterMap=new HashMap<>();
+		parameterMap.put("userId",this.getSessionUser().getUserId());
+
+		List<SourceDb> list = delegateMapper.selectList("com.sjjybsgj.dao.sourcedb.mapper.SourceDbMapper.selectSourceDbByUserId",parameterMap);
 		return this.resultPage(list);
 	}
 
@@ -95,8 +101,68 @@ public class SourceDbController extends BaseController {
 			}
 
 		}
-
 		return listnode;
+	}
+
+	/**
+	 * 存储数据源
+	 * @param connectName
+	 * @param dbName
+	 * @param ip
+	 * @param port
+	 * @param dbUserName
+	 * @param dbPassword
+	 * @param dbType
+	 * @return
+	 */
+	@RequestMapping(value = "saveSourceDb", method = RequestMethod.POST)
+	@ResponseBody
+	public MsgModel saveSource(String connectName, String dbName, String ip, Integer port, String dbUserName, String dbPassword, String dbType) {
+		SourceDbMapper mapper = this.getMapper(SourceDbMapper.class);
+
+		SourceDb sourceDb = new SourceDb();
+		sourceDb.setDbSourceId(this.getUUID());
+		sourceDb.setUserId(this.getSessionUser().getUserId());
+		sourceDb.setConnectName(connectName);
+		sourceDb.setDbName(dbName);
+		sourceDb.setIp(ip);
+		sourceDb.setPort(port);
+		sourceDb.setDbUserName(dbUserName);
+		sourceDb.setDbPassword(dbPassword);
+		sourceDb.setDbType(dbType);
+
+		DBUtils db = new DBUtils(sourceDb);
+		Connection connection = db.getConn();
+		if (!(isNull(connection))) {
+			db.closeConn();
+			if (mapper.insertSelective(sourceDb) == 1) {
+
+				return this.resultMsg("添加数据源成功");
+
+			} else {
+				return this.resultMsg("添加数据源失败，请重新添加！");
+			}
+
+		} else {
+			return this.resultMsg("添加数据源失败，不能连接配置的数据源，请更正数据源信息后重新添加！");
+		}
+	}
+
+	/**
+	 * 删除数据源
+	 * @param dbSourceId
+	 * @return
+	 */
+	@RequestMapping(value = "deleteSourceDb", method = RequestMethod.POST)
+	@ResponseBody
+	public MsgModel deleteSource(String dbSourceId) {
+		SourceDbMapper mapper = this.getMapper(SourceDbMapper.class);
+
+		if (mapper.deleteByPrimaryKey(dbSourceId) == 1) {
+			return this.resultMsg("删除数据源成功");
+		} else {
+			return this.resultMsg("删除数据源失败，请重新删除！");
+		}
 	}
 
 }

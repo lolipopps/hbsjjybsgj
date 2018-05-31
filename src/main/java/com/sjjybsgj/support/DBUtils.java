@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +20,7 @@ public class DBUtils {
 	private ResultSet rs = null;
 	private DBType dbtype;
 
-	//设置数据库类型
+	// 设置数据库类型
 	public void setDbtype(String dbtype) {
 		dbtype = dbtype.toUpperCase();
 		if (dbtype.toUpperCase().equals("POSTGRESQL")) {
@@ -34,7 +35,6 @@ public class DBUtils {
 			throw new RuntimeException("不支持的数据库类型");
 		}
 	}
-
 
 	public DBUtils(SourceDb sourcedb) {
 		try {
@@ -61,12 +61,12 @@ public class DBUtils {
 		}
 	}
 
-	//获取连接
-	public Connection getConn(){
+	// 获取连接
+	public Connection getConn() {
 		return this.conn;
 	}
 
-	//关闭连接
+	// 关闭连接
 	public void closeConn() {
 		if (rs != null) {
 			try {
@@ -91,16 +91,15 @@ public class DBUtils {
 		}
 	}
 
-
-	public String getRangeSql(String string, String dbName,String tableName, String cloumnName,String dbType) {
+	public String getRangeSql(String string, String dbName, String tableName, String cloumnName, String dbType) {
 		StringBuffer conditions = new StringBuffer();
-		if(dbType.toUpperCase().equals("SQLSERVER")) {
+		if (dbType.toUpperCase().equals("SQLSERVER")) {
 			tableName = "dbo." + tableName;
 		}
-		if(dbType.toUpperCase().equals("ORACLE")) {
+		if (dbType.toUpperCase().equals("ORACLE")) {
 			dbName = "";
-		}else {
-			dbName = dbName+".";
+		} else {
+			dbName = dbName + ".";
 		}
 		String[] strs = string.split(",");
 		for (String str : strs) {
@@ -114,18 +113,19 @@ public class DBUtils {
 			}
 		}
 		conditions.replace(conditions.length() - 1, conditions.length(), ")");
-		String sql = "SELECT * FROM " +dbName + tableName + " where " + cloumnName + " not in (" + conditions.toString();
+		String sql = "SELECT * FROM " + dbName + tableName + " where " + cloumnName + " not in ("
+				+ conditions.toString();
 		return sql;
 	}
 
 	public String execQuery(String sql) {
 		try {
-			Statement  stmt = conn.createStatement();
+			Statement stmt = conn.createStatement();
 			stmt.execute(sql);
 			rs = stmt.getResultSet();
-			if(rs.next()) {
+			if (rs.next()) {
 				return "有不满足的数据";
-			}else {
+			} else {
 				return null;
 			}
 		} catch (SQLException e) {
@@ -135,8 +135,61 @@ public class DBUtils {
 
 	}
 
-	//通过自定义sql语句执行查询
-	public List<List<String>> execQuerySql(String sql){
+	public boolean execQueryUpdate(String sql) {
+		Statement stmt = null;
+		Savepoint spt1 = null;
+		try {
+			stmt = conn.createStatement();
+			spt1 = conn.setSavepoint("myspt1");
+			conn.setAutoCommit(false);
+			stmt.executeUpdate(sql);
+			conn.commit();
+		} catch (SQLException e) {
+			try {
+				conn.rollback(spt1);
+				conn.commit();
+				stmt.close();
+				e.printStackTrace();
+				return false;
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+				return false;
+			}
+		}
+		return true;
+
+	}
+
+	public String execsql(String sql) {
+		Statement stmt = null;
+		
+		try {
+			conn.setAutoCommit(false);
+			stmt = conn.createStatement();
+			boolean hasResultSet = stmt.execute(sql);
+			conn.commit();
+			if (hasResultSet) {
+				return "S";
+			} else {
+				return "C";
+			}
+		} catch (SQLException e) {
+			try {
+				conn.rollback();
+			} catch (SQLException e1) {
+
+				e1.printStackTrace();
+				return null;
+			}
+			e.printStackTrace();
+			return null;
+		}
+
+	}
+
+	// 通过自定义sql语句执行查询
+	public List<List<String>> execQuerySql(String sql) {
 		try {
 			List<List<String>> list = new ArrayList<List<String>>();
 			Statement stmt = conn.createStatement();
@@ -144,13 +197,13 @@ public class DBUtils {
 			ResultSetMetaData rsmd = rs.getMetaData();
 			int columnCount = rsmd.getColumnCount();
 			List<String> l = new ArrayList<String>();
-			for(int i = 0; i < columnCount; i++) {
-				l.add(rsmd.getColumnName(i+1));
+			for (int i = 0; i < columnCount; i++) {
+				l.add(rsmd.getColumnName(i + 1));
 			}
 			list.add(l);
-			while(rs.next()) {
+			while (rs.next()) {
 				l = new ArrayList<String>();
-				for(int i = 0; i < columnCount; i++) {
+				for (int i = 0; i < columnCount; i++) {
 					l.add(rs.getString(i + 1));
 
 				}
@@ -166,6 +219,5 @@ public class DBUtils {
 	public void getTableRel() {
 
 	}
-
 
 }

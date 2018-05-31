@@ -1,14 +1,11 @@
 package com.sjjybsgj.controller;
 
 import java.sql.Connection;
-import java.util.ArrayList;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.servlet.http.HttpSession;
-
 import org.springframework.stereotype.Controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +16,8 @@ import com.sjjybsgj.dao.checkedlog.mapper.CheckedLogMapper;
 import com.sjjybsgj.dao.checkedlog.model.CheckedLog;
 import com.sjjybsgj.dao.collectrule.mapper.CollectRuleMapper;
 import com.sjjybsgj.dao.collectrule.model.CollectRule;
+import com.sjjybsgj.dao.jobinfo.mapper.JobinfoMapper;
+import com.sjjybsgj.dao.jobinfo.model.Jobinfo;
 import com.sjjybsgj.dao.login.model.LoginUser;
 import com.sjjybsgj.dao.model.JsonModel;
 import com.sjjybsgj.dao.model.MsgModel;
@@ -31,6 +30,7 @@ import com.sjjybsgj.dao.standarddb.mapper.StandardDbMapper;
 import com.sjjybsgj.dao.standarddb.model.StandardDb;
 import com.sjjybsgj.dao.updatelog.mapper.UpdateLogMapper;
 import com.sjjybsgj.dao.updatelog.model.UpdateLog;
+import com.sjjybsgj.dao.user.model.SysUser;
 import com.sjjybsgj.core.annotation.MapperInject;
 import com.sjjybsgj.controller.BaseController;
 
@@ -47,47 +47,112 @@ import com.sjjybsgj.support.DBUtils;
 @RequestMapping("/common/collect")
 public class CollectController extends BaseController {
 
-	private static final String NAMESPACE = "com.sjjybsgj.dao.sourcedb.mapper.SourceDbMapper";
+	private static final String NAMESPACE = "com.sjjybsgj.dao.jobinfo.mapper.JobinfoMapper";
 
 	@MapperInject
 	private DelegateMapper delegateMapper;
 
 	@MapperInject(CollectRuleMapper.class)
 	private CollectRuleMapper collectRuleMapper;
+
+	@MapperInject(JobinfoMapper.class)
+	private JobinfoMapper jobinfoMapper;
+
+	@MapperInject(CheckedLogMapper.class)
+	private CheckedLogMapper ckeckedlogMapper;
+
 	/**
 	 * 获取角色 tree 结构<br>
 	 *
 	 * @param id
 	 *            父Id
-	 * @return 
+	 * @return
 	 * @return List<RoleNode> 角色节点列表集合
 	 */
 	@RequestMapping(value = "/ruleList", method = RequestMethod.POST)
 	@ResponseBody
-	public  List<CollectRule> ruleList() {
+	public List<CollectRule> ruleList() {
 		List<CollectRule> lists = collectRuleMapper.selectByExample(null);
 		return lists;
 	}
-	
+
 	@RequestMapping(value = "/collect", method = RequestMethod.POST)
 	@ResponseBody
-	public  MsgModel collect(String dbName, String userId,String collectRule) {
-		HashMap<String,String> parameter = new HashMap<String,String>();
+	public MsgModel collect(String dbName, String userId, String collectRule) {
+		HashMap<String, String> parameter = new HashMap<String, String>();
 		parameter.put("dbName", dbName);
 		parameter.put("userId", userId);
-		parameter.put("collectRule", collectRule);
-		
-		SourceDb sourceDb = delegateMapper.selectOne("com.sjjybsgj.dao.jiaoyan.mapper.jiaoyanMapper.getjiaoyanSource", parameter);
-		DBUtils dbutils = new DBUtils(sourceDb);  // 获取连接
-		Connection conn = dbutils.getConn();
-		if(conn == null) {
-			System.out.println("连接失败");
-			return new MsgModel("0","数据库连接失败");
-		}else {
-			// 获取采集规则
-		}
-		return new MsgModel("1","正在采集,请稍后");
-	}
+		System.out.println(collectRule);
+		String[] sqls = collectRule.split(";");
 
+		if (sqls.length == 0) {
+			return new MsgModel("0", "SQL出错");
+		}
+
+		SourceDb sourceDb = delegateMapper.selectOne("com.sjjybsgj.dao.jiaoyan.mapper.jiaoyanMapper.getjiaoyanSource",
+				parameter);
+		
+		SysUser user = delegateMapper.selectOne("com.sjjybsgj.dao.user.mapper.SysUserMapper.selectByUserId",
+				userId);
+		
+		
+		DBUtils dbutils = new DBUtils(sourceDb); // 获取连接
+		Connection conn = dbutils.getConn();
+		if (conn == null) {
+			System.out.println("连接失败");
+			return new MsgModel("0", "数据库连接失败");
+		} else {
+
+			String jobId = this.getUUID();
+			Jobinfo jobinfo = new Jobinfo();
+			jobinfo.setJobId(jobId);
+			jobinfo.setUserId(userId);
+			jobinfo.setJobName(user.getUserName());
+			jobinfo.setUserName(user.getUserName());
+			jobinfo.setAllStage(String.valueOf(sqls.length));
+			jobinfo.setNowStage("0");
+			jobinfo.setStartTime(new Date());
+			jobinfo.setStates(0);
+			jobinfo.setIsEnd("0");
+			jobinfoMapper.insert(jobinfo);
+
+			new Thread() {
+				public void run() {
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+					int num = 1;
+					for (String sql : sqls) {
+						sql = sql+";";
+						System.out.println(sql);
+						String result = dbutils.execsql(sql);
+						if (result != null) {
+							HashMap<String,Object> para = new HashMap<String,Object>();
+							para.put("jobId", jobId);
+							para.put("nowStage", String.valueOf(num));
+							if(num == sqls.length) {
+								para.put("endTime", sdf.format(new Date()));
+								para.put("isEnd", "1");
+								para.put("states", "100");
+							}else {
+								para.put("endTime", null);
+								para.put("isEnd", "0");
+								para.put("states", String.valueOf(num*100/sqls.length));
+							}
+							delegateMapper.update(NAMESPACE+".updateByjobid",para);	
+							System.out.println("updateByjobid"+" "+ jobId+" "+ num);
+						}
+						try {
+							Thread.sleep(10000);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+						num++;
+					}
+					dbutils.closeConn();
+				}
+			}.start();
+
+		}
+		return new MsgModel("1", "正在采集,请稍后");
+	}
 
 }

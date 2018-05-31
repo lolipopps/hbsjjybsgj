@@ -395,4 +395,18 @@
     where USER_ID = #{userId,jdbcType=VARCHAR}
       and USER_CODE = #{userCode,jdbcType=VARCHAR}
   </update>
+  
+  
+  
+  
+    <select id="selectByUserId" parameterType="java.lang.String"  resultMap="BaseResultMap">
+    select *
+    from SYS_USER
+    where USER_ID = #{userId}
+  </select>
+  
+  
+  
+  
+  
 </mapper>

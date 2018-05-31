@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sjjybsgj.dao.jiaoyan.mapper.jobMapper">
+<resultMap id="JobinfoMap" type="com.sjjybsgj.dao.jobinfo.model.Jobinfo">
+<result column="USER_ID" jdbcType="VARCHAR" property="userId" />
+    <result column="JOB_ID" jdbcType="VARCHAR" property="jobId" />
+    <result column="USER_NAME" jdbcType="VARCHAR" property="userName" />
+    <result column="JOB_NAME" jdbcType="VARCHAR" property="jobName" />
+    <result column="START_TIME" jdbcType="TIMESTAMP" property="startTime" />
+    <result column="NOW_STAGE" jdbcType="VARCHAR" property="nowStage" />
+    <result column="ALL_STAGE" jdbcType="VARCHAR" property="allStage" />
+    <result column="END_TIME" jdbcType="TIMESTAMP" property="endTime" />
+    <result column="IS_END" jdbcType="VARCHAR" property="isEnd" />
+    <result column="STATE" jdbcType="INTEGER" property="state" />
+  </resultMap>
+
+
+</mapper>

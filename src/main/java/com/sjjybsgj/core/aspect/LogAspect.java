@@ -60,7 +60,7 @@ public class LogAspect {
 	/**
 	 * 切入点表达式
 	 */
-	@Pointcut("execution(* com.sjjybsgj.*.controller.*.*(..))")
+	@Pointcut("execution(* com.sjjybsgj.controller.*.*(..))")
 	public void logPointCut() {}
 	
 	/**

@@ -72,6 +72,10 @@
 		<name>用户校验</name>
 		<url>/common/jiaoyan/manage</url>
 			</menuItem>
+				<menuItem>
+		<name>任务状态</name>
+		<url>/common/jobinfo/jobinfo</url>
+			</menuItem>
 	</menu>
 	
 	<menu name="帮助文档" icon="zmdi zmdi-help">

@@ -34,6 +34,12 @@
 		</menuItem>
 		-->
 	</menu>
+	<menu name="数据源管理" icon="zmdi zmdi-lock-outline">
+		<menuItem>
+			<name>数据源管理</name>
+			<url>/common/datasource/manage</url>
+		</menuItem>
+	</menu>
 	<menu name="角色与资源管理" icon="zmdi zmdi-lock-outline">
 		<menuItem>
 			<name>角色管理</name>
@@ -65,6 +71,10 @@
 		<menuItem>
 		<name>用户校验</name>
 		<url>/common/jiaoyan/manage</url>
+			</menuItem>
+				<menuItem>
+		<name>任务状态</name>
+		<url>/common/jobinfo/jobinfo</url>
 			</menuItem>
 	</menu>
 	

@@ -371,5 +371,12 @@
     SELECT * FROM source_db WHERE USER_ID =
     #{userId}
   </select>
+  
+    <select id="selectSourceDbByUserIddbName" resultMap="BaseResultMap"
+          parameterType="java.util.HashMap">
+    SELECT * FROM source_db WHERE USER_ID =
+    #{userId} and DB_NAME = #{DB_NAME}
+  </select>
+  
 
 </mapper>

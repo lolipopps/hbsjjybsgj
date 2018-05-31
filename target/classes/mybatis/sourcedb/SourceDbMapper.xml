@@ -364,4 +364,12 @@
       DB_TYPE = #{dbType,jdbcType=INTEGER}
     where DB_SOURCE_ID = #{dbSourceId,jdbcType=VARCHAR}
   </update>
+
+
+  <select id="selectSourceDbByUserId" resultMap="BaseResultMap"
+          parameterType="java.util.HashMap">
+    SELECT * FROM source_db WHERE USER_ID =
+    #{userId}
+  </select>
+
 </mapper>

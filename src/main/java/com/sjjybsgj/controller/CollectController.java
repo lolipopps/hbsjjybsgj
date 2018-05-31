@@ -1,5 +1,6 @@
 package com.sjjybsgj.controller;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -46,7 +47,7 @@ import com.sjjybsgj.support.DBUtils;
 @RequestMapping("/common/collect")
 public class CollectController extends BaseController {
 
-	private static final String NAMESPACE = "com.sjjybsgj.dao.jiaoyan.mapper.jiaoyanMapper";
+	private static final String NAMESPACE = "com.sjjybsgj.dao.sourcedb.mapper.SourceDbMapper";
 
 	@MapperInject
 	private DelegateMapper delegateMapper;
@@ -66,6 +67,26 @@ public class CollectController extends BaseController {
 	public  List<CollectRule> ruleList() {
 		List<CollectRule> lists = collectRuleMapper.selectByExample(null);
 		return lists;
+	}
+	
+	@RequestMapping(value = "/collect", method = RequestMethod.POST)
+	@ResponseBody
+	public  MsgModel collect(String dbName, String userId,String collectRule) {
+		HashMap<String,String> parameter = new HashMap<String,String>();
+		parameter.put("dbName", dbName);
+		parameter.put("userId", userId);
+		parameter.put("collectRule", collectRule);
+		
+		SourceDb sourceDb = delegateMapper.selectOne("com.sjjybsgj.dao.jiaoyan.mapper.jiaoyanMapper.getjiaoyanSource", parameter);
+		DBUtils dbutils = new DBUtils(sourceDb);  // 获取连接
+		Connection conn = dbutils.getConn();
+		if(conn == null) {
+			System.out.println("连接失败");
+			return new MsgModel("0","数据库连接失败");
+		}else {
+			// 获取采集规则
+		}
+		return new MsgModel("1","正在采集,请稍后");
 	}
 
 

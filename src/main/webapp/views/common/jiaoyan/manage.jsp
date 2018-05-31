@@ -43,17 +43,12 @@
 		<div id="toolbar">
 			<a class="waves-effect btn btn-info btn-sm"
 				href="javascript:addAction();"><i class="zmdi zmdi-plus"></i>数据采集</a>
-			
+
 			<select id="tableList" class="selectpicker" name="tableList"
-				data-max-options="1" 
-				data-live-placeholder="请选择要校验的库">
-			</select> 
-			
-			<a class="waves-effect btn btn-danger btn-sm"
+				data-max-options="1" data-live-placeholder="请选择要校验的库">
+			</select> <a class="waves-effect btn btn-danger btn-sm"
 				href="javascript:jiaoyanAction();"><i class="zmdi zmdi-delete"></i>
-				校验</a> 
-			
-			<a class="waves-effect btn btn-primary btn-sm"
+				校验</a> <a class="waves-effect btn btn-primary btn-sm"
 				href="javascript:roleAction();"><i class="zmdi zmdi-male"></i>
 				校验并上传</a>
 		</div>
@@ -64,8 +59,7 @@
 		id="loadingModal" aria-hidden="true">
 
 		<div
-			style="width: 200px; height: 20px; z-index: 20000; position: absolute; text-align: 
-			center; left: 50%; top: 50%; margin-left: -100px; margin-top: -10px">
+			style="width: 200px; height: 20px; z-index: 20000; position: absolute; text-align: center; left: 50%; top: 50%; margin-left: -100px; margin-top: -10px">
 			<div class="progress progress-striped active"
 				style="margin-bottom: 0;">
 				<div class="progress-bar" style="width: 100%;"></div>
@@ -76,57 +70,73 @@
 			</h5>
 		</div>
 	</div>
-	
-	
-	
+
+
+
 	<!-- 采集窗口 -->
 	<div class="modal fade" id="caijiModal" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title" id="myModalLabel">采集功能</h4>
-            </div>
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="myModalLabel">采集功能</h4>
+				</div>
 
-            
-           <div class="col-md-12" style="margin-top: 10px; margin-bottom: 10px;">
-			<div class="col-md-4"
-				style="background-color: #D2E9FF; line-height: 26px; vertical-align: middle;">
-				<label style="margin-top: 5px; font-size: 14px; color: grey;">请输入要采集的库</label>
-			</div>
-			<div class="col-md-8">
-				<select id="collectdbname" class="selectpicker" 
-					data-max-options="1"   onchange="Onchang1()">
-				</select> 
-			</div>
-		</div>
-		
-		
-		  <div class="col-md-12" style="margin-top: 10px; margin-bottom: 10px;">
-			<div class="col-md-4"
-				style="background-color: #D2E9FF; line-height: 26px; vertical-align: middle;">
-				<label style="margin-top: 5px; font-size: 14px; color: grey;">请选择要采集的规则</label>
-			</div>
-			<div class="col-md-8">
-				<select id="collectdbrule" class="selectpicker" name="collectdbrule"
-					data-max-options="1" 
-					data-live-search-placeholder="采集规则" >
 
-				</select> 
+				<div class="col-md-12"
+					style="margin-top: 10px; margin-bottom: 10px;">
+					<div class="col-md-4"
+						style="background-color: #D2E9FF; line-height: 26px; vertical-align: middle;">
+						<label style="margin-top: 5px; font-size: 14px; color: grey;">请选择要采集的库</label>
+					</div>
+					<div class="col-md-8">
+						<select id="collectdbname" class="selectpicker"
+							data-max-options="1" onchange="Onchang1()">
+						</select>
+					</div>
+				</div>
+
+
+				<div class="col-md-12"
+					style="margin-top: 10px; margin-bottom: 10px;">
+					<div class="col-md-4"
+						style="background-color: #D2E9FF; line-height: 26px; vertical-align: middle;">
+						<label style="margin-top: 5px; font-size: 14px; color: grey;">请选择要采集的规则</label>
+					</div>
+					<div class="col-md-8">
+						<select id="collectdbrule" class="selectpicker"
+							name="collectdbrule" data-max-options="1"
+							data-live-search-placeholder="采集规则"  onchange="Onchang2()">
+
+						</select>
+					</div>
+				</div>
+
+
+				<div class="col-md-12"
+					style="margin-top: 10px; margin-bottom: 10px;">
+					<div class="col-md-4"
+						style="background-color: #D2E9FF; line-height: 26px; vertical-align: middle;">
+						<label style="margin-top: 5px; font-size: 14px; color: grey;">采集的规则为</label>
+					</div>
+					<div class="col-md-8">
+						
+						<textarea id="Ruletextarea" rows="10" cols="40" readonly="readonly"></textarea>
+					</div>
+				</div>
+
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary"
+						onclick="caijiAction()">采集</button>
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+
+				</div>
 			</div>
+			<!-- /.modal-content -->
 		</div>
-		
-	
-            
-            
-            <div class="modal-footer">
-            <button type="button" class="btn btn-primary">采集</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                
-            </div>
-        </div><!-- /.modal-content -->
-    </div><!-- /.modal -->
-    </div>
+		<!-- /.modal -->
+	</div>
 </body>
 
 <script type="text/javascript">
@@ -221,8 +231,7 @@
 									success : function(data) {
 										$('#'+selectid+'.selectpicker')
 										.append("<option>请选择</a>");
-										$
-												.each(
+										$.each(
 														data,
 														function(i) {
 															$('#'+selectid+'.selectpicker')
@@ -243,7 +252,7 @@
 	}
 
 	
-
+	var collectrules;
 	
 	function selectedchange(selectid,url,field,selected){
 			// 获取checkBox值
@@ -252,9 +261,14 @@
 						type : "post", //数据发送方式
 						success : function(data) {
 							var num = 0;
+							collectrules = data;
 							$.each(data,
 											function(i) {
 												if(selected==data[i].dbName){
+													if(num==0){
+														$('#'+selectid+'.selectpicker')
+														.append("<option>请选择规则</option>");
+													}
 												$('#'+selectid+'.selectpicker')
 													.append("<option value=" + data[i][field] + ">"
 																		+ data[i][field]
@@ -266,8 +280,10 @@
 							if(num == 0){
 								$('#'+selectid+'.selectpicker')
 								.append("<option>该库下没有采集规则</option>");
+								$('#Ruletextarea').val("没有规则");
 							}
 							// 缺一不可  
+							
 							$('#'+selectid).selectpicker('refresh');
 							$('#'+selectid).selectpicker('render');
 						},
@@ -286,9 +302,24 @@
 		
 	}
 	
+	function Onchang2(){ //获取被选中的option标签选项 
+
+		var collectName  = $("#collectdbrule option:selected").val();
+		for(j = 0; j < collectrules.length; j++) {
+			 if(collectrules[j].collectName == collectName ){
+				 $('#Ruletextarea').val(collectrules[j].collectSql);
+				 break;
+			 }
+				 
+		} 
+		
+		
+	}
 	
 	
 	
+		
+
 	
 	//添加
 	function jiaoyanAction() {
@@ -300,8 +331,7 @@
 			keyboard : true
 		});
 		$("#loadingModal").modal('show');
-		$
-				.ajax({
+		$.ajax({
 					url : '${pageContext.request.contextPath}/common/jiaoyan/jiaoyandb',//写你自己的方法
 					type : "post", //数据发送方式
 					data : {
@@ -333,7 +363,41 @@
 	}
 	
 
-	
+  function caijiAction(){
+	  var userId = '${user.userId}'; 
+	  var dbName =  $('#collectdbname option:selected').val(); 4
+	  var collectName = $('#collectdbrule').val();//选中的值
+	  var collectRule = $('#Ruletextarea').val();//选中的值
+	  if(dbName == null){alert("请选择数据库");}
+	  else if(collectRule == "没有规则" || collectName=="请选择规则" ){alert("采集失败,请选择规则");}
+	  else{
+	  	alert(userId+" "+dbName+" "+collectRule+" "+"11111111");
+		$.ajax({
+			url : '${pageContext.request.contextPath}/common/collect/collect',//写你自己的方法
+			type : "post", //数据发送方式
+			data : {
+				dbName : dbName,
+				userId : userId,
+				collectRule: collectRule
+			},
+			dataType : "json",//后台处理后返回的数据格式
+			success : function(data) {
+				if (data.status == 0) {
+					$('#loadingModal').modal('hide');
+					alert("校验失败 失败的原因" + data.msg);
+				} else {
+					$('#loadingModal').modal('hide');
+					alert("校验成功" + data.msg);
+				}
+			},
+			error : function(data) {
+				$('#loadingModal').modal('hide');
+				alert("校验失败 ,失败原因,数据库异常");
+			}
+
+		})
+	  }
+  }
 	
 	
 </script>

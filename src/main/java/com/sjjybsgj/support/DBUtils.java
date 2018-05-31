@@ -63,8 +63,7 @@ public class DBUtils {
 
 	//获取连接
 	public Connection getConn(){
-
-		return conn;
+		return this.conn;
 	}
 
 	//关闭连接

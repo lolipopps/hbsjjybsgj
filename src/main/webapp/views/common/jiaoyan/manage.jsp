@@ -43,13 +43,17 @@
 		<div id="toolbar">
 			<a class="waves-effect btn btn-info btn-sm"
 				href="javascript:addAction();"><i class="zmdi zmdi-plus"></i>数据采集</a>
+			
 			<select id="tableList" class="selectpicker" name="tableList"
-				data-max-options="1" data-live-search="true"
-				data-live-search-placeholder="请选择要校验的库" multiple>
-
-			</select> <a class="waves-effect btn btn-danger btn-sm"
+				data-max-options="1" 
+				data-live-placeholder="请选择要校验的库">
+			</select> 
+			
+			<a class="waves-effect btn btn-danger btn-sm"
 				href="javascript:jiaoyanAction();"><i class="zmdi zmdi-delete"></i>
-				校验</a> <a class="waves-effect btn btn-primary btn-sm"
+				校验</a> 
+			
+			<a class="waves-effect btn btn-primary btn-sm"
 				href="javascript:roleAction();"><i class="zmdi zmdi-male"></i>
 				校验并上传</a>
 		</div>
@@ -60,7 +64,8 @@
 		id="loadingModal" aria-hidden="true">
 
 		<div
-			style="width: 200px; height: 20px; z-index: 20000; position: absolute; text-align: center; left: 50%; top: 50%; margin-left: -100px; margin-top: -10px">
+			style="width: 200px; height: 20px; z-index: 20000; position: absolute; text-align: 
+			center; left: 50%; top: 50%; margin-left: -100px; margin-top: -10px">
 			<div class="progress progress-striped active"
 				style="margin-bottom: 0;">
 				<div class="progress-bar" style="width: 100%;"></div>
@@ -71,6 +76,57 @@
 			</h5>
 		</div>
 	</div>
+	
+	
+	
+	<!-- 采集窗口 -->
+	<div class="modal fade" id="caijiModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">采集功能</h4>
+            </div>
+
+            
+           <div class="col-md-12" style="margin-top: 10px; margin-bottom: 10px;">
+			<div class="col-md-4"
+				style="background-color: #D2E9FF; line-height: 26px; vertical-align: middle;">
+				<label style="margin-top: 5px; font-size: 14px; color: grey;">请输入要采集的库</label>
+			</div>
+			<div class="col-md-8">
+				<select id="collectdbname" class="selectpicker" 
+					data-max-options="1"   onchange="Onchang1()">
+				</select> 
+			</div>
+		</div>
+		
+		
+		  <div class="col-md-12" style="margin-top: 10px; margin-bottom: 10px;">
+			<div class="col-md-4"
+				style="background-color: #D2E9FF; line-height: 26px; vertical-align: middle;">
+				<label style="margin-top: 5px; font-size: 14px; color: grey;">请选择要采集的规则</label>
+			</div>
+			<div class="col-md-8">
+				<select id="collectdbrule" class="selectpicker" name="collectdbrule"
+					data-max-options="1" 
+					data-live-search-placeholder="采集规则" >
+
+				</select> 
+			</div>
+		</div>
+		
+	
+            
+            
+            <div class="modal-footer">
+            <button type="button" class="btn btn-primary">采集</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+    </div>
 </body>
 
 <script type="text/javascript">
@@ -109,7 +165,6 @@
 	};
 
 	var $table = $('#table');
-	var userId;
 	$(function() {
 		$table.bsTable({
 			url : '${pageContext.request.contextPath}/common/jiaoyan/list',
@@ -153,43 +208,90 @@
 		});
 
 	});
-
-	$('#tableList')
-			.on(
-					'shown.bs.select',
-					function(e) { // shown.bs.select bootstrap 的内置的
+	
+	getdbinfo("tableList");
+	
+	function getdbinfo(selectid){
+	$('#'+selectid).on('shown.bs.select',function(e) { // shown.bs.select bootstrap 的内置的
 						// 获取checkBox值
 						$
 								.ajax({
 									url : '${pageContext.request.contextPath}/common/jiaoyan/dbList',//写你自己的方法
 									type : "post", //数据发送方式
 									success : function(data) {
+										$('#'+selectid+'.selectpicker')
+										.append("<option>请选择</a>");
 										$
 												.each(
-														data.res,
+														data,
 														function(i) {
-															$(
-																	'#tableList.selectpicker')
-																	.append(
-																			"<option value=" + data.res[i].dbName + ">"
-																					+ data.res[i].dbName
-																					+ "</option>");
-														});
+															$('#'+selectid+'.selectpicker')
+																.append("<option value=" + data[i].dbName + ">"
+																					+ data[i].dbName
+																					+ "</option>");});
 										// 缺一不可  
-										$('#tableList').selectpicker('refresh');
-										$('#tableList').selectpicker('render');
+										$('#'+selectid).selectpicker('refresh');
+										$('#'+selectid).selectpicker('render');
 									},
 									error : function(data) {
 										alert("查询表格失败" + data);
 									}
 
 								})
-						$('#tableList').empty();
+						$('#'+selectid).empty();
 					});
+	}
 
+	
+
+	
+	function selectedchange(selectid,url,field,selected){
+			// 获取checkBox值
+			$.ajax({
+						url : '${pageContext.request.contextPath}'+url,//写你自己的方法
+						type : "post", //数据发送方式
+						success : function(data) {
+							var num = 0;
+							$.each(data,
+											function(i) {
+												if(selected==data[i].dbName){
+												$('#'+selectid+'.selectpicker')
+													.append("<option value=" + data[i][field] + ">"
+																		+ data[i][field]
+																		+ "</option>");
+												num = num+1;
+												}
+											}			
+									);
+							if(num == 0){
+								$('#'+selectid+'.selectpicker')
+								.append("<option>该库下没有采集规则</option>");
+							}
+							// 缺一不可  
+							$('#'+selectid).selectpicker('refresh');
+							$('#'+selectid).selectpicker('render');
+						},
+						error : function(data) {
+							alert("查询表格失败" + data);
+						}
+
+					})
+			$('#'+selectid).empty();
+		}
+
+	
+	function Onchang1(){ //获取被选中的option标签选项 
+		var optionselected  = $("#collectdbname option:selected").val();
+		selectedchange("collectdbrule","/common/collect/ruleList",'collectName',optionselected);
+		
+	}
+	
+	
+	
+	
+	
 	//添加
 	function jiaoyanAction() {
-
 		var dbName = $('#tableList option:selected').val();//选中的值
 		var userId = '${user.userId}'; // 获取当前用户 Id
 		// <!-- 模态框不会隐藏 -->
@@ -198,7 +300,6 @@
 			keyboard : true
 		});
 		$("#loadingModal").modal('show');
-
 		$
 				.ajax({
 					url : '${pageContext.request.contextPath}/common/jiaoyan/jiaoyandb',//写你自己的方法
@@ -225,7 +326,16 @@
 				})
 
 	}
-	// 删除
+	getdbinfo("collectdbname");
+	function addAction(){
+		$("#caijiModal").modal('show');
+		// 采集功能
+	}
+	
+
+	
+	
+	
 </script>
 
 </html>

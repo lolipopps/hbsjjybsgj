@@ -83,9 +83,9 @@ public class JiaoyanController extends BaseController {
 	 */
 	@RequestMapping(value = "/dbList", method = RequestMethod.POST)
 	@ResponseBody
-	public JsonModel tableList() {
+	public List<SourceDb> tableList() {
 		List<SourceDb> list = SourceDbMapper.selectByExample(null);
-		return this.resultJson(list);
+		return list;
 	}
 
 	@RequestMapping(value = "/jiaoyandb", method = RequestMethod.POST)

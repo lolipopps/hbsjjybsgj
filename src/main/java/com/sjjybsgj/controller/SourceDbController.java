@@ -3,6 +3,7 @@ package com.sjjybsgj.controller;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +20,7 @@ import com.sjjybsgj.core.persistence.DelegateMapper;
 import com.sjjybsgj.dao.model.PageModel;
 import com.sjjybsgj.dao.sourcedb.mapper.SourceDbMapper;
 import com.sjjybsgj.dao.sourcedb.model.SourceDb;
+import com.sjjybsgj.dao.standarddb.mapper.StandardDbMapper;
 import com.sjjybsgj.dao.standarddb.model.StandardDb;
 
 
@@ -45,6 +47,10 @@ public class SourceDbController extends BaseController {
 
 	@MapperInject(SourceDbMapper.class)
 	private SourceDbMapper mapper;
+	
+	
+	@MapperInject(StandardDbMapper.class)
+	private StandardDbMapper standardDbMapper;
 
 	@RequestMapping("/manage")
 	public String manage() {
@@ -104,6 +110,7 @@ public class SourceDbController extends BaseController {
 		return listnode;
 	}
 
+
 	/**
 	 * 存储数据源
 	 * @param connectName
@@ -131,7 +138,7 @@ public class SourceDbController extends BaseController {
 		sourceDb.setDbPassword(dbPassword);
 		sourceDb.setDbType(dbType);
 
-		DBUtils db = new DBUtils(sourceDb);
+		DBUtils db = new DBUtils(sourceDb,dbName);
 		Connection connection = db.getConn();
 		if (!(isNull(connection))) {
 			db.closeConn();
@@ -146,6 +153,42 @@ public class SourceDbController extends BaseController {
 		} else {
 			return this.resultMsg("添加数据源失败，不能连接配置的数据源，请更正数据源信息后重新添加！");
 		}
+	}
+
+
+	@RequestMapping(value = "updateSourceDb", method = RequestMethod.POST)
+	@ResponseBody
+	public MsgModel updateSourceDb(String dbSourceId,String connectName, String dbName, String ip, Integer port, String dbUserName, String dbPassword, String dbType) {
+
+		SourceDbMapper mapper = this.getMapper(SourceDbMapper.class);
+
+		SourceDb sourceDb = new SourceDb();
+		sourceDb.setDbSourceId(dbSourceId);
+		sourceDb.setUserId(this.getSessionUser().getUserId());
+		sourceDb.setConnectName(connectName);
+		sourceDb.setDbName(dbName);
+		sourceDb.setIp(ip);
+		sourceDb.setPort(port);
+		sourceDb.setDbUserName(dbUserName);
+		sourceDb.setDbPassword(dbPassword);
+		sourceDb.setDbType(dbType);
+
+		DBUtils db = new DBUtils(sourceDb,dbName);
+		Connection connection = db.getConn();
+
+		if (!(isNull(connection))) {
+			db.closeConn();
+			if (mapper.updateByPrimaryKey(sourceDb) == 1) {
+
+				return this.resultMsg("修改数据源成功");
+
+			} else {
+				return this.resultMsg("修改数据源失败，请重新修改！");
+			}
+		}else {
+			return this.resultMsg("修改数据源失败，不能连接配置的数据源，请更正数据源信息后重新添加！");
+		}
+
 	}
 
 	/**
@@ -165,4 +208,87 @@ public class SourceDbController extends BaseController {
 		}
 	}
 
+	@RequestMapping(value = "biaojiegoujiaoyan",method = RequestMethod.POST)
+	@ResponseBody
+	public MsgModel biaojiegoujiaoyan(String dbSourceId,String connectName, String dbName, String ip, Integer port, String dbUserName, String dbPassword, String dbType) {
+		SourceDbMapper mapper = this.getMapper(SourceDbMapper.class);
+
+		//根据数据库名获取该标准库的所有标准表
+		Map<String,String> parameterMap=new HashMap<>();
+		parameterMap.put("dbName",dbName);
+		List<StandardDb> StandardDblist = delegateMapper.selectList("com.sjjybsgj.dao.standarddb.mapper.StandardDbMapper.selectStandardDbBydbName",parameterMap);
+
+		ArrayList<String> standardDbTableList=new ArrayList<>();
+
+		SourceDb sourceDb = new SourceDb();
+		sourceDb.setDbSourceId(dbSourceId);
+		sourceDb.setUserId(this.getSessionUser().getUserId());
+		sourceDb.setConnectName(connectName);
+		sourceDb.setDbName(dbName);
+		sourceDb.setIp(ip);
+		sourceDb.setPort(port);
+		sourceDb.setDbUserName(dbUserName);
+		sourceDb.setDbPassword(dbPassword);
+		sourceDb.setDbType(dbType);
+
+		DBUtils db = new DBUtils(sourceDb,dbName);
+		Connection connection = db.getConn();
+		if (!(isNull(connection))) {
+			List<List<String>> daiJiaoYanTablelist=db.execQuerySql("show tables;");
+			Map<String,List<List<String>>> daiTableAndZiDuan=new HashMap<String,List<List<String>>>();
+
+            ArrayList<String> dai=new ArrayList<>();
+            for(int i = 1; i < daiJiaoYanTablelist.size(); i++) {
+                dai.add(daiJiaoYanTablelist.get(i).get(0));
+
+            }
+
+            //全集
+			HashSet<String> quanjiTable=new HashSet<String>();
+            quanjiTable.addAll(dai);
+
+			//通过的表
+			ArrayList<String> tongguoTable=new ArrayList<String>();
+
+			//缺表
+			ArrayList<String> queTable=new ArrayList<String>();
+
+			//多余的表
+			ArrayList<String> duoyuTable=new ArrayList<String>();
+
+                for (StandardDb standardDb:StandardDblist){
+                	standardDbTableList.add(standardDb.getTableName());
+
+                    System.out.println("xiaomai2;standardDb:"+standardDb.getTableName());
+                    if (dai.contains(standardDb.getTableName())){
+                        tongguoTable.add(standardDb.getTableName());
+						List<List<String>> daiJiaoYanZiDuanlist=db.execQuerySql("desc "+standardDb.getTableName()+";");
+						daiTableAndZiDuan.put(standardDb.getTableName(),daiJiaoYanZiDuanlist);
+                        System.out.println("tongguoTable:"+tongguoTable);
+
+                    }else {
+                        System.out.println("xiaomai3;standardDb:"+standardDb.getTableName());
+                        queTable.add(standardDb.getTableName());
+                        System.out.println("queTable:"+queTable);
+
+                    }
+                }
+                quanjiTable.addAll(standardDbTableList);
+                for (String s:quanjiTable){
+                	if (!(standardDbTableList.contains(s))){
+                		duoyuTable.add(s);
+					}
+
+				}
+			db.closeConn();
+			System.out.println("通过的表："+tongguoTable);
+			System.out.println("缺表:"+queTable);
+			System.out.println("字段："+daiTableAndZiDuan);
+			return this.resultMsg("校验结果："+"通过的表："+tongguoTable+"+++++缺表:"+queTable+"+++++多余的表:"+duoyuTable+"字段："+daiTableAndZiDuan);
+
+		}else {
+			return this.resultMsg("校验表结构失败，原因：不能连接配置的数据源，请更正数据源信息后重新添加！");
+		}
+
+	}
 }

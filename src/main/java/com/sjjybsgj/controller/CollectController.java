@@ -5,31 +5,18 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.springframework.stereotype.Controller;
-
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.sjjybsgj.dao.checkedlog.mapper.CheckedLogMapper;
-import com.sjjybsgj.dao.checkedlog.model.CheckedLog;
 import com.sjjybsgj.dao.collectrule.mapper.CollectRuleMapper;
 import com.sjjybsgj.dao.collectrule.model.CollectRule;
 import com.sjjybsgj.dao.jobinfo.mapper.JobinfoMapper;
 import com.sjjybsgj.dao.jobinfo.model.Jobinfo;
-import com.sjjybsgj.dao.login.model.LoginUser;
-import com.sjjybsgj.dao.model.JsonModel;
 import com.sjjybsgj.dao.model.MsgModel;
-import com.sjjybsgj.dao.model.PageModel;
-import com.sjjybsgj.dao.ruletable.model.RuleTable;
-import com.sjjybsgj.dao.ruletable.model.RuleTableWithBLOBs;
-import com.sjjybsgj.dao.sourcedb.mapper.SourceDbMapper;
 import com.sjjybsgj.dao.sourcedb.model.SourceDb;
-import com.sjjybsgj.dao.standarddb.mapper.StandardDbMapper;
-import com.sjjybsgj.dao.standarddb.model.StandardDb;
-import com.sjjybsgj.dao.updatelog.mapper.UpdateLogMapper;
-import com.sjjybsgj.dao.updatelog.model.UpdateLog;
+
 import com.sjjybsgj.dao.user.model.SysUser;
 import com.sjjybsgj.core.annotation.MapperInject;
 import com.sjjybsgj.controller.BaseController;
@@ -87,15 +74,14 @@ public class CollectController extends BaseController {
 		if (sqls.length == 0) {
 			return new MsgModel("0", "SQL出错");
 		}
-		int runingJob = delegateMapper.selectOne("com.sjjybsgj.dao.jobinfo.mapper.JobinfoMapper.countRunningByUserid",
+		Long runingJob = delegateMapper.selectOne("com.sjjybsgj.dao.jobinfo.mapper.JobinfoMapper.countRunningByUserid",
 				userId);
-		if(runingJob>3) {
+		if (runingJob > 3) {
 			return new MsgModel("0", "你当前运行的任务过多,请等任务结束后再提交");
 		}
 		SourceDb sourceDb = delegateMapper.selectOne("com.sjjybsgj.dao.jiaoyan.mapper.jiaoyanMapper.getjiaoyanSource",
 				parameter);
-		SysUser user = delegateMapper.selectOne("com.sjjybsgj.dao.user.mapper.SysUserMapper.selectByUserId",
-				userId);
+		SysUser user = delegateMapper.selectOne("com.sjjybsgj.dao.user.mapper.SysUserMapper.selectByUserId", userId);
 		DBUtils dbutils = new DBUtils(sourceDb); // 获取连接
 		Connection conn = dbutils.getConn();
 		if (conn == null) {
@@ -119,29 +105,29 @@ public class CollectController extends BaseController {
 					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 					int num = 1;
 					for (String sql : sqls) {
-						sql = sql+";";
+						sql = sql + ";";
 						System.out.println(sql);
 						String result = dbutils.execsql(sql);
-						HashMap<String,Object> para = new HashMap<String,Object>();
+						HashMap<String, Object> para = new HashMap<String, Object>();
 						if (result != null) {
 							para.put("jobId", jobId);
 							para.put("nowStage", String.valueOf(num));
-							if(num == sqls.length) {
+							if (num == sqls.length) {
 								para.put("endTime", sdf.format(new Date()));
 								para.put("isEnd", "1");
 								para.put("states", "100");
-							}else {
+							} else {
 								para.put("endTime", null);
 								para.put("isEnd", "0");
-								para.put("states", String.valueOf(num*100/sqls.length));
+								para.put("states", String.valueOf(num * 100 / sqls.length));
 							}
-							delegateMapper.update(NAMESPACE+".updateByjobid",para);	
-							System.out.println("updateByjobid"+" "+ jobId+" "+ num);
-						}else {
+							delegateMapper.update(NAMESPACE + ".updateByjobid", para);
+							System.out.println("updateByjobid" + " " + jobId + " " + num);
+						} else {
 							para.put("endTime", sdf.format(new Date()));
 							para.put("isEnd", "2");
-							para.put("states", String.valueOf(num*100/sqls.length));
-							delegateMapper.update(NAMESPACE+".updateByjobid",para);	
+							para.put("states", String.valueOf(num * 100 / sqls.length));
+							delegateMapper.update(NAMESPACE + ".updateByjobid", para);
 							dbutils.closeConn();
 							this.stop();
 						}

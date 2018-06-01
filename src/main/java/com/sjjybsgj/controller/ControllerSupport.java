@@ -56,19 +56,18 @@ import com.sjjybsgj.dao.model.MsgModel;
 import com.sjjybsgj.dao.model.PageModel;
 import com.sjjybsgj.support.BaseSupport;
 
-
 /**
  * 名称：ControllerSupport<br>
  *
- * 描述：控制器支持类，继承于父类BaseSupport，
- * 该类提供了获取mapper、动态设置数据源、分页、返回Page、Msg对象、文件上传下载等方法，
+ * 描述：控制器支持类，继承于父类BaseSupport， 该类提供了获取mapper、动态设置数据源、分页、返回Page、Msg对象、文件上传下载等方法，
  * 父类提供了封装好的工具类方法。（方法详细见参考信息）<br>
  *
  * @author Yanzheng 严正<br>
- * 时间：<br>
- * 2017-08-25 16:05:05<br>
- * 版权：<br>
- * Copyright 2017 <a href="https://github.com/micyo202" target="_blank">https://github.com/micyo202</a>. All rights reserved.
+ *         时间：<br>
+ *         2017-08-25 16:05:05<br>
+ *         版权：<br>
+ *         Copyright 2017 <a href="https://github.com/micyo202" target=
+ *         "_blank">https://github.com/micyo202</a>. All rights reserved.
  * 
  * @see BaseSupport
  * @see MsgModel
@@ -85,7 +84,8 @@ public abstract class ControllerSupport extends BaseSupport {
 	/**
 	 * 获取 mapper 对象<br>
 	 *
-	 * @param type 生成的 Mapper 接口对象类型
+	 * @param type
+	 *            生成的 Mapper 接口对象类型
 	 * @return T 泛型，传入参数对象的类型Mapper
 	 */
 	protected <T> T getMapper(Class<T> type) {
@@ -104,7 +104,8 @@ public abstract class ControllerSupport extends BaseSupport {
 	/**
 	 * 动态切换数据源方法，设置数据源名称<br>
 	 *
-	 * @param dataSource 数据源名称（必须是spring配置中包含的名称）
+	 * @param dataSource
+	 *            数据源名称（必须是spring配置中包含的名称）
 	 */
 	protected void setDataSource(String dataSource) {
 		DataSourceContextHolder.setDataSource(dataSource);
@@ -120,8 +121,10 @@ public abstract class ControllerSupport extends BaseSupport {
 	/**
 	 * 分页查询范围，参数均由 bootstrapTable 分页插件进行传入，无需人工控制，只需调用方法即可<br>
 	 *
-	 * @param offset 起始数量
-	 * @param limit 限制条数
+	 * @param offset
+	 *            起始数量
+	 * @param limit
+	 *            限制条数
 	 */
 	protected void offsetPage(int offset, int limit) {
 		PageHelper.offsetPage(offset, limit);
@@ -130,7 +133,8 @@ public abstract class ControllerSupport extends BaseSupport {
 	/**
 	 * 分页结果集对象<br>
 	 *
-	 * @param list 查询到的分页结果，为 Page 对象
+	 * @param list
+	 *            查询到的分页结果，为 Page 对象
 	 * @return PageModel<T> 自定义的分页模型，T 为查询的对象
 	 */
 	protected <T> PageModel<T> resultPage(List<T> list) {
@@ -140,9 +144,12 @@ public abstract class ControllerSupport extends BaseSupport {
 	/**
 	 * 消息返回对象<br>
 	 *
-	 * @param status 状态值（可根据需求任意设置，无强制标准）
-	 * @param msg 消息内容
-	 * @param res 返回的对象
+	 * @param status
+	 *            状态值（可根据需求任意设置，无强制标准）
+	 * @param msg
+	 *            消息内容
+	 * @param res
+	 *            返回的对象
 	 * @return MsgModel 自定义消息模型
 	 */
 	protected MsgModel resultMsg(String status, String msg, Object res) {
@@ -152,33 +159,34 @@ public abstract class ControllerSupport extends BaseSupport {
 	/**
 	 * 消息返回对象<br>
 	 *
-	 * @param status 状态值（可根据需求任意设置，无强制标准）
-	 * @param msg 详细内容
+	 * @param status
+	 *            状态值（可根据需求任意设置，无强制标准）
+	 * @param msg
+	 *            详细内容
 	 * @return MsgModel 自定义消息模型
 	 */
 	protected MsgModel resultMsg(String status, String msg) {
 		return new MsgModel(status, msg);
 	}
-	
-	
+
 	/**
 	 * 消息返回对象<br>
 	 *
-	 * @param status 状态值（可根据需求任意设置，无强制标准）
-	 * @param msg 详细内容
+	 * @param status
+	 *            状态值（可根据需求任意设置，无强制标准）
+	 * @param msg
+	 *            详细内容
 	 * @return MsgModel 自定义消息模型
 	 */
 	protected JsonModel resultJson(Object object) {
 		return new JsonModel(object);
 	}
 
-	
-	
-
 	/**
 	 * 消息返回对象<br>
 	 *
-	 * @param msg 详细内容
+	 * @param msg
+	 *            详细内容
 	 * @return MsgModel 自定义消息模型
 	 */
 	protected MsgModel resultMsg(String msg) {
@@ -188,7 +196,8 @@ public abstract class ControllerSupport extends BaseSupport {
 	/**
 	 * 文件上传方法，支持多个文件上传<br>
 	 *
-	 * @param request 上传方法中传递的 request 对象，并非父类中的 request 对象
+	 * @param request
+	 *            上传方法中传递的 request 对象，并非父类中的 request 对象
 	 * @return List<String> 上传文件成功后的新文件名称，以集合形式返回
 	 */
 	protected List<String> fileUpLoad(HttpServletRequest request) {
@@ -233,25 +242,25 @@ public abstract class ControllerSupport extends BaseSupport {
 		}
 		return null;
 	}
-	
-	
-//	@InitBinder
-//    public void initBinder(ServletRequestDataBinder binder) {
-//        /**
-//         * 自动转换日期类型的字段格式
-//         */
-//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-//        binder.registerCustomEditor(Date.class, new CustomDateEditor(sdf, true));
-//
-//        
-//    }
-//	
+
+	// @InitBinder
+	// public void initBinder(ServletRequestDataBinder binder) {
+	// /**
+	// * 自动转换日期类型的字段格式
+	// */
+	// SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	// binder.registerCustomEditor(Date.class, new CustomDateEditor(sdf, true));
+	//
+	//
+	// }
+	//
 
 	/**
 	 * 文件下载方法<br>
 	 *
-	 * @param fileName 需要下载的文件名称
-	 * @return ResponseEntity<byte[]> 下载的文件，在浏览器会进行下载 
+	 * @param fileName
+	 *            需要下载的文件名称
+	 * @return ResponseEntity<byte[]> 下载的文件，在浏览器会进行下载
 	 */
 	protected ResponseEntity<byte[]> fileDownLoad(String fileName) {
 		try {

@@ -378,4 +378,30 @@
       VAILD_DATE = #{vaildDate,jdbcType=TIMESTAMP}
     where LOG_ID = #{logId,jdbcType=VARCHAR}
   </update>
+  
+      <select id="selectCheckedLogByUserId" resultMap="BaseResultMap"
+          parameterType="java.util.HashMap">
+    SELECT * FROM checked_log WHERE USER_ID = #{userId}
+  </select>
+  
+  
+    <select id="getSummaryinfo" resultType="java.util.Map">
+  select  
+USER_NAME ,
+YEAR_MONTHS, 
+sum(upload) as upload, 
+sum(jiaoyan)as jiaoYan, 
+sum(caiji) as caiJi
+from (
+select 
+USER_NAME,
+YEAR_MONTHS,
+ case when JOB_TYPE='上传' then TOTAL end as upload,
+ case when JOB_TYPE='校验' then TOTAL end as jiaoyan,
+ case when JOB_TYPE='采集' then TOTAL end as caiji
+ from (
+select sum(now_stage) as TOTAL,JOB_TYPE, USER_NAME, date_format( end_Time,'%Y-%m') as YEAR_MONTHS from  
+		jobinfo group by user_NAME, date_format(end_Time,'%Y-%m') ,job_type) A ) B group by  user_NAME, YEAR_MONTHS
+ </select>
+  
 </mapper>

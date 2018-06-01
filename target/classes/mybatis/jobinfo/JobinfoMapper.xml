@@ -295,5 +295,10 @@
   </update>
   
   
+     <select id="countRunningByUserid" parameterType="java.lang.String" resultMap="java.lang.Interger">
+    select count(*) from JOBINFO  where JOB_ID = #{userId} and IS_END = '0';	
+  </select>
+  
+  
   
 </mapper>

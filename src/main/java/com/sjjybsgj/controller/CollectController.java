@@ -84,25 +84,24 @@ public class CollectController extends BaseController {
 		parameter.put("userId", userId);
 		System.out.println(collectRule);
 		String[] sqls = collectRule.split(";");
-
 		if (sqls.length == 0) {
 			return new MsgModel("0", "SQL出错");
 		}
-
+		int runingJob = delegateMapper.selectOne("com.sjjybsgj.dao.jobinfo.mapper.JobinfoMapper.countRunningByUserid",
+				userId);
+		if(runingJob>3) {
+			return new MsgModel("0", "你当前运行的任务过多,请等任务结束后再提交");
+		}
 		SourceDb sourceDb = delegateMapper.selectOne("com.sjjybsgj.dao.jiaoyan.mapper.jiaoyanMapper.getjiaoyanSource",
 				parameter);
-		
 		SysUser user = delegateMapper.selectOne("com.sjjybsgj.dao.user.mapper.SysUserMapper.selectByUserId",
 				userId);
-		
-		
 		DBUtils dbutils = new DBUtils(sourceDb); // 获取连接
 		Connection conn = dbutils.getConn();
 		if (conn == null) {
 			System.out.println("连接失败");
 			return new MsgModel("0", "数据库连接失败");
 		} else {
-
 			String jobId = this.getUUID();
 			Jobinfo jobinfo = new Jobinfo();
 			jobinfo.setJobId(jobId);
@@ -115,7 +114,6 @@ public class CollectController extends BaseController {
 			jobinfo.setStates(0);
 			jobinfo.setIsEnd("0");
 			jobinfoMapper.insert(jobinfo);
-
 			new Thread() {
 				public void run() {
 					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -124,8 +122,8 @@ public class CollectController extends BaseController {
 						sql = sql+";";
 						System.out.println(sql);
 						String result = dbutils.execsql(sql);
+						HashMap<String,Object> para = new HashMap<String,Object>();
 						if (result != null) {
-							HashMap<String,Object> para = new HashMap<String,Object>();
 							para.put("jobId", jobId);
 							para.put("nowStage", String.valueOf(num));
 							if(num == sqls.length) {
@@ -139,6 +137,13 @@ public class CollectController extends BaseController {
 							}
 							delegateMapper.update(NAMESPACE+".updateByjobid",para);	
 							System.out.println("updateByjobid"+" "+ jobId+" "+ num);
+						}else {
+							para.put("endTime", sdf.format(new Date()));
+							para.put("isEnd", "2");
+							para.put("states", String.valueOf(num*100/sqls.length));
+							delegateMapper.update(NAMESPACE+".updateByjobid",para);	
+							dbutils.closeConn();
+							this.stop();
 						}
 						try {
 							Thread.sleep(10000);

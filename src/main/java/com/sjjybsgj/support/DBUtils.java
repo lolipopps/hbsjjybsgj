@@ -216,8 +216,30 @@ public class DBUtils {
 		}
 	}
 
-	public void getTableRel() {
-
+	public List<List<String>> getQuerySql(String sql) {
+		List<List<String>> list = new ArrayList<List<String>>();
+		try {
+			Statement stmt = conn.createStatement();
+			rs = stmt.executeQuery(sql);
+			ResultSetMetaData rsmd = rs.getMetaData();
+			int columnCount = rsmd.getColumnCount();
+			List<String> l = new ArrayList<String>();
+			for (int i = 0; i < columnCount; i++) {
+				l.add(rsmd.getColumnName(i + 1));
+			}
+			list.add(l);
+			while (rs.next()) {
+				ArrayList<String> rol = new ArrayList<String>();
+				for (int i = 0; i < columnCount; i++) {
+					rol.add(rs.getString(i + 1));
+				}
+				list.add(rol);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+		return list;
 	}
 
 }

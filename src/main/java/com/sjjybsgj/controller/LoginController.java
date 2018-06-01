@@ -49,7 +49,7 @@ public class LoginController extends BaseController {
 	@ResponseBody
 	public LoginModel signin(String username, String password, boolean remember) {
 		
-		Map<String, Object> paramMap = new HashMap<>();
+		Map<String, String> paramMap = new HashMap<>();
         paramMap.put("userCode", username);
         paramMap.put("userPassword", password);
         

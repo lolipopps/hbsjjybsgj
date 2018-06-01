@@ -61,6 +61,45 @@ public class DBUtils {
 		}
 	}
 
+
+	public  DBUtils(SourceDb sourcedb,String dbName) {
+
+		try {
+			String url = null;
+			String driver = null;
+			//System.out.println(ds.getIp());
+			if("MYSQL".equals(sourcedb.getDbType().toUpperCase())) {
+				//mysql:3306
+				url = "jdbc:mysql://" + sourcedb.getIp()+ ":" + sourcedb.getPort() + "/" + sourcedb.getDbName() + "?useUnicode=true&characterEncoding=UTF-8";
+				driver = "com.mysql.jdbc.Driver";
+			} else if("SQLSERVER".equals(sourcedb.getDbType().toUpperCase())) {
+				//sqlserver:1433
+				url = "jdbc:sqlserver://" + sourcedb.getIp() + ":" + sourcedb.getPort() + ";DatabaseName=" + sourcedb.getDbName();
+				driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+			} else if("ORACLE".equals(sourcedb.getDbType().toUpperCase())) {
+				//oracle:1521
+				url = "jdbc:oracle:thin:@" + sourcedb.getIp() + ":" + sourcedb.getPort() + ":" + sourcedb.getDbName();
+				driver = "oracle.jdbc.driver.OracleDriver";
+			} else if("DAMENG".equals(sourcedb.getDbType().toUpperCase())) {
+				//达梦
+				url = "jdbc:dm://" + sourcedb.getIp() + ":" + sourcedb.getPort() + "/" + sourcedb.getDbName();
+				driver = "dm.jdbc.driver.DmDriver";
+			}else {
+
+				System.out.println("不支持的数据库类型！");
+			}
+			Class.forName(driver);
+			System.out.println(sourcedb.getDbType());
+			System.out.println("url:"+url+";DbUserName:"+sourcedb.getDbUserName()+";DbPassword:"+sourcedb.getDbPassword());
+
+			this.conn = DriverManager.getConnection(url,sourcedb.getDbUserName(),sourcedb.getDbPassword());
+			System.out.println("数据库连接成功");
+		} catch (Exception e) {
+			System.out.println("数据库连接失败:" + e);
+		}
+
+	}
+
 	//获取连接
 	public Connection getConn(){
 		return this.conn;

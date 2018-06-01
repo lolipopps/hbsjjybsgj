@@ -283,4 +283,10 @@
       IF_VAILD = #{ifVaild,jdbcType=INTEGER}
     where DB_RULE_ID = #{dbRuleId,jdbcType=VARCHAR}
   </update>
+
+  <select id="selectStandardDbBydbName" resultMap="BaseResultMap"
+          parameterType="java.util.HashMap">
+    SELECT * FROM standard_db WHERE DB_NAME =#{dbName}
+  </select>
+
 </mapper>
